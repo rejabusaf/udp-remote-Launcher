@@ -8,3 +8,4 @@ In the Cmd Remote iOS app, create buttons, Example:
                     # 01 for Button 1 and so on
   BEHAVIOUR: Send 1x
   
+#### Work in progress for GUI & XML config save ###
