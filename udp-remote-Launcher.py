@@ -4,9 +4,8 @@ import socket
 import subprocess
 import datetime
 import weakref
+import pickle
 
-wolPort = 55555
-AppInstanceCounter = 1
 
 class Launcher:
 
@@ -52,6 +51,9 @@ class Launcher:
                 dead.add(ref)
         cls._instances -= dead
 
+    def __repr__(self):
+        return "Launcher('{}','{}','{}','{}'".format(self.ApplicationID, self.ApplicationPath, self.ApplicationParameters, self.UDPBin)
+
 
 def getCapturedString():
     wOLServer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -62,45 +64,30 @@ def getCapturedString():
     wOLDatastring = wOLData.decode("utf-8")
     return wOLDatastring
 
-print(datetime.datetime.now(), "First Time Setup")
-print(datetime.datetime.now(), "--------------------------------------------------------\n")
 
-print(datetime.datetime.now(), "Button No:",AppInstanceCounter,": setup follows:")
-inApplicationPath = input("Enter Command/Path >>>>>: ")
-App1 = Launcher(inApplicationPath)
+configFileName = "config.raw"
+wolPort = 55555
+AppInstanceCounter = 1
+Apps = []
 
-print(datetime.datetime.now(), "Button No:",AppInstanceCounter,": setup follows:")
-inApplicationPath = input("Enter Command/Path >>>>>: ")
-App2 = Launcher(inApplicationPath)
-
-print(datetime.datetime.now(), "Button No:",AppInstanceCounter,": setup follows:")
-inApplicationPath = input("Enter Command/Path >>>>>: ")
-App3 = Launcher(inApplicationPath)
-
-print(datetime.datetime.now(), "Button No:",AppInstanceCounter,": setup follows:")
-inApplicationPath = input("Enter Command/Path >>>>>: ")
-App4 = Launcher(inApplicationPath)
-
-print(datetime.datetime.now(), "Button No:",AppInstanceCounter,": setup follows:")
-inApplicationPath = input("Enter Command/Path >>>>>: ")
-App5 = Launcher(inApplicationPath)
-
-print(datetime.datetime.now(), "Button No:",AppInstanceCounter,": setup follows:")
-inApplicationPath = input("Enter Command/Path >>>>>: ")
-App6 = Launcher(inApplicationPath)
-
-print(datetime.datetime.now(), "Button No:",AppInstanceCounter,": setup follows:")
-inApplicationPath = input("Enter Command/Path >>>>>: ")
-App7 = Launcher(inApplicationPath)
-
-print(datetime.datetime.now(), "Button No:",AppInstanceCounter,": setup follows:")
-inApplicationPath = input("Enter Command/Path >>>>>: ")
-App8 = Launcher(inApplicationPath)
+if os.path.isfile('./config.raw'):
+    print("Config File found: config.raw. Loading Buttons")
+    Apps = pickle.load(open(configFileName, "rb"))
+    print(Apps)
+else:
+    print("No Config File found: config.raw")
+    print(datetime.datetime.now(), "Setup follows")
+    print(datetime.datetime.now(), "--------------------------------------------------------\n")
+    for i in range(0,8):
+        print(datetime.datetime.now(), "Button No:", AppInstanceCounter, ": setup follows:")
+        inApplicationPath = input("Enter Command/Path >>>>>: ")
+        Apps.append(1)
+        Apps[i] = Launcher(inApplicationPath)
+    pickle.dump(Apps, open(configFileName, "wb"), pickle.HIGHEST_PROTOCOL)
 
 run = True
 
-while (run):
+while run:
     capturedStr = getCapturedString()
-    for obj in Launcher.getinstances():
-        obj.openApp(capturedStr)
-
+    for i in range(0,8):
+        Apps[i].openApp(capturedStr)
