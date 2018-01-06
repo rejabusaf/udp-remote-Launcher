@@ -70,8 +70,8 @@ wolPort = 55555
 AppInstanceCounter = 1
 Apps = []
 
-if os.path.isfile('./config.raw'):
-    print("Config File found: config.raw. Loading Buttons")
+if os.path.isfile('./'+configFileName):
+    print("Config File found: " + configFileName + ". Loading Buttons")
     Apps = pickle.load(open(configFileName, "rb"))
     print(Apps)
 else:
@@ -91,3 +91,4 @@ while run:
     capturedStr = getCapturedString()
     for i in range(0,8):
         Apps[i].openApp(capturedStr)
+
