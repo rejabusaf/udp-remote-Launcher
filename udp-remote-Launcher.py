@@ -5,7 +5,7 @@ import subprocess
 import datetime
 import weakref
 import pickle
-
+import signal
 
 class Launcher:
 
@@ -18,21 +18,30 @@ class Launcher:
         self.ApplicationPath = self.Path[0]
         self.ApplicationParameters = self.Path[1]
         self.UDPBin = str(AppInstanceCounter).zfill(2)
+        self.Pid = 0
         del self.Path
         del FPath
         self._instances.add(weakref.ref(self))
         AppInstanceCounter += 1
 
-    def openApp(self, receivedBin):
+    def startStopApp(self, receivedBin):
         if receivedBin == self.UDPBin:
-            print(datetime.datetime.now(), ":", "Matching UDP Packet received for ApplicationID:", self.ApplicationID)
-            if self.isTaskRunning():
-                print(datetime.datetime.now(), ":", self.ApplicationParameters + 'is already running')
-                return False
+            if self.Pid < 1:
+                print(datetime.datetime.now(), ":", "Signal received to START", self.ApplicationID)
+                if self.isTaskRunning():
+                    print(datetime.datetime.now(), ":", self.ApplicationParameters , 'is already running')
+                    return False
+                else:
+                    process = subprocess.Popen([self.ApplicationPath + "\\" + self.ApplicationParameters], shell=False)
+                    self.Pid = process.pid
+                    print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Started with PID:', self.Pid)
+                    return True
             else:
-                print(datetime.datetime.now(), ":", 'Starting:', self.ApplicationParameters)
-                subprocess.call([self.ApplicationPath + "\\" + self.ApplicationParameters], 0)
-                return True
+                os.kill(self.Pid, signal.SIGINT)
+                self.Pid = 0
+                print(datetime.datetime.now(), ":", "Signal received to STOP", self.ApplicationParameters,)
+                print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Stopped with PID:', self.Pid)
+                return False
 
     def isTaskRunning(self):
         tasklist = os.popen('tasklist /v | findstr "' + self.ApplicationParameters + '"')
@@ -90,4 +99,4 @@ run = True
 while run:
     capturedStr = getCapturedString()
     for i in range(0,8):
-        Apps[i].openApp(capturedStr)
+        Apps[i].startStopApp(capturedStr)
