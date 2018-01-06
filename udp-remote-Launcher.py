@@ -19,6 +19,7 @@ class Launcher:
         self.ApplicationParameters = self.Path[1]
         self.UDPBin = str(AppInstanceCounter).zfill(2)
         self.Pid = 0
+        self.process = 0
         del self.Path
         del FPath
         self._instances.add(weakref.ref(self))
@@ -32,12 +33,12 @@ class Launcher:
                     print(datetime.datetime.now(), ":", self.ApplicationParameters , 'is already running')
                     return False
                 else:
-                    process = subprocess.Popen([self.ApplicationPath + "\\" + self.ApplicationParameters], shell=False)
-                    self.Pid = process.pid
+                    self.process = subprocess.Popen([self.ApplicationPath + "\\" + self.ApplicationParameters], shell=False)
                     print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Started with PID:', self.Pid)
+                    self.Pid = self.process.pid
                     return True
             else:
-                os.kill(self.Pid, signal.SIGINT)
+                self.process.terminate()
                 self.Pid = 0
                 print(datetime.datetime.now(), ":", "Signal received to STOP", self.ApplicationParameters,)
                 print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Stopped with PID:', self.Pid)
