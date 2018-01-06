@@ -5,7 +5,6 @@ import subprocess
 import datetime
 import weakref
 import pickle
-import signal
 
 class Launcher:
 
@@ -33,15 +32,18 @@ class Launcher:
                     print(datetime.datetime.now(), ":", self.ApplicationParameters , 'is already running')
                     return False
                 else:
-                    self.process = subprocess.Popen([self.ApplicationPath + "\\" + self.ApplicationParameters], shell=False)
+                    fullPath = str(explorerPath + ' "' + self.ApplicationPath + "\\" + self.ApplicationParameters+ '"')
+                    print(fullPath)
+                    self.process = subprocess.Popen(fullPath, shell=True)
+                    self.process.communicate()
                     print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Started with PID:', self.Pid)
                     self.Pid = self.process.pid
                     return True
             else:
                 self.process.terminate()
+                print(datetime.datetime.now(), ":", "Signal received to STOP", self.ApplicationParameters, )
+                print(datetime.datetime.now(), ":", self.ApplicationParameters, 'with PID:', self.Pid, 'Stopped')
                 self.Pid = 0
-                print(datetime.datetime.now(), ":", "Signal received to STOP", self.ApplicationParameters,)
-                print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Stopped with PID:', self.Pid)
                 return False
 
     def isTaskRunning(self):
@@ -67,8 +69,8 @@ class Launcher:
 
 def getCapturedString():
     wOLServer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    wOLServer.bind(("", wolPort))
-    print(datetime.datetime.now(), ":", "Listening on 0.0.0.0 for Matching UDP Packets on port", wolPort, '(UDP)')
+    wOLServer.bind(("", inListenPort))
+    print(datetime.datetime.now(), ":", "Listening on 0.0.0.0 for Matching UDP Packets on port", inListenPort, '(UDP)')
     wOLData = wOLServer.recv(1024)
     wOLServer.shutdown(0)
     wOLDatastring = wOLData.decode("utf-8")
@@ -76,8 +78,9 @@ def getCapturedString():
 
 
 configFileName = "config.raw"
-wolPort = 55555
+inListenPort = 170 # Print server
 AppInstanceCounter = 1
+explorerPath = '"C:\Windows\explorer.exe"'
 Apps = []
 
 if os.path.isfile('./'+configFileName):
@@ -87,6 +90,7 @@ else:
     print(datetime.datetime.now(), ":", "No Config File found: config.raw")
     print(datetime.datetime.now(), ":", "Setup follows")
     print(datetime.datetime.now(), ":", "--------------------------------------------------------\n")
+    inListenPort = input("Port number [ default: 170 ]:")
     for i in range(0,8):
         print(datetime.datetime.now(), ":", "Button #" + str(AppInstanceCounter),"setup follows:")
         inApplicationPath = input("Enter Command/Path >>>>>: ")
@@ -101,3 +105,4 @@ while run:
     capturedStr = getCapturedString()
     for i in range(0,8):
         Apps[i].startStopApp(capturedStr)
+
