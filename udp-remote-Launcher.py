@@ -24,26 +24,27 @@ class Launcher:
         self._instances.add(weakref.ref(self))
         AppInstanceCounter += 1
 
-    def startStopApp(self):
-        if self.Pid < 1:
-            print(datetime.datetime.now(), ":", "Signal received to START", self.ApplicationID)
-            if self.isTaskRunning():
-                print(datetime.datetime.now(), ":", self.ApplicationParameters , 'is already running')
-                return False
+    def startStopApp(self, receivedBin):
+        if receivedBin == self.UDPBin:
+            if self.Pid < 1:
+                print(datetime.datetime.now(), ":", "Signal received to START", self.ApplicationID)
+                if self.isTaskRunning():
+                    print(datetime.datetime.now(), ":", self.ApplicationParameters , 'is already running')
+                    return False
+                else:
+                    fullPath = str(explorerPath + ' "' + self.ApplicationPath + "\\" + self.ApplicationParameters+ '"')
+                    print(fullPath)
+                    self.process = subprocess.Popen(fullPath, shell=True)
+                    self.process.communicate()
+                    print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Started with PID:', self.Pid)
+                    self.Pid = self.process.pid
+                    return True
             else:
-                fullPath = str(explorerPath + ' "' + self.ApplicationPath + "\\" + self.ApplicationParameters+ '"')
-                print(fullPath)
-                self.process = subprocess.Popen(fullPath, shell=True)
-                self.process.communicate()
-                print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Started with PID:', self.Pid)
-                self.Pid = self.process.pid
-                return True
-        else:
-            self.process.terminate()
-            print(datetime.datetime.now(), ":", "Signal received to STOP", self.ApplicationParameters, )
-            print(datetime.datetime.now(), ":", self.ApplicationParameters, 'with PID:', self.Pid, 'Stopped')
-            self.Pid = 0
-            return False
+                self.process.terminate()
+                print(datetime.datetime.now(), ":", "Signal received to STOP", self.ApplicationParameters, )
+                print(datetime.datetime.now(), ":", self.ApplicationParameters, 'with PID:', self.Pid, 'Stopped')
+                self.Pid = 0
+                return False
 
     def isTaskRunning(self):
         tasklist = os.popen('tasklist /v | findstr "' + self.ApplicationParameters + '"')
@@ -75,20 +76,6 @@ def getCapturedString():
     wOLDatastring = wOLData.decode("utf-8")
     return wOLDatastring
 
-def gridGate(capturedStr):
-    x,y = capturedStr.split('$')
-    if bool(int(x)) is False:
-        if bool(int(y)) is False:
-            print("00")
-            Apps[0].startStopApp()
-        else:
-            Apps[1].startStopApp()
-    else:
-        if bool(int(y)) is False:
-            Apps[2].startStopApp()
-        else:
-            Apps[3].startStopApp()
-
 
 configFileName = "config.raw"
 inListenPort = 170 # Print server
@@ -116,4 +103,6 @@ run = True
 
 while run:
     capturedStr = getCapturedString()
-    gridGate(capturedStr)
+    for i in range(0,8):
+        Apps[i].startStopApp(capturedStr)
+        
