@@ -1,5 +1,4 @@
 
-
 import os
 import socket
 import subprocess
@@ -50,7 +49,7 @@ class Launcher:
         if self.ApplicationParameters in tasklist:
             return True
         return False
-    
+
 def getCapturedString():
     wOLServer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     wOLServer.bind(("", inListenPort))
@@ -62,7 +61,6 @@ def getCapturedString():
 
 
 configFileName = "config.raw"
-inListenPort = 170 # Print server
 AppInstanceCounter = 1
 explorerPath = '"C:\Windows\explorer.exe"'
 Apps = []
@@ -74,8 +72,12 @@ else:
     print(datetime.datetime.now(), ":", "No Config File found: config.raw")
     print(datetime.datetime.now(), ":", "Setup follows")
     print(datetime.datetime.now(), ":", "--------------------------------------------------------\n")
-    inListenPort = input("Port number [ default: 170 ]:")
-    for i in range(0,8):
+    inListenPort = input("Port number [range 1 to 65535]:")
+    inListenPort = int(inListenPort)
+    inNumButtons = input("Number of Buttons to configure:")
+    inNumButtons = int(inNumButtons)
+
+    for i in range(0,inNumButtons):
         print(datetime.datetime.now(), ":", "Button #" + str(AppInstanceCounter),"setup follows:")
         inApplicationPath = input("Enter Command/Path >>>>>: ")
         Apps.append(1)
