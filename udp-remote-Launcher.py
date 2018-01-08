@@ -1,4 +1,5 @@
 
+
 import os
 import socket
 import subprocess
@@ -16,35 +17,33 @@ class Launcher:
         self.ApplicationID = AppInstanceCounter
         self.ApplicationPath = self.Path[0]
         self.ApplicationParameters = self.Path[1]
-        self.UDPBin = str(AppInstanceCounter).zfill(2)
         self.Pid = 0
-        self.process = 0
+        self.process = None
         del self.Path
         del FPath
         self._instances.add(weakref.ref(self))
         AppInstanceCounter += 1
 
-    def startStopApp(self, receivedBin):
-        if receivedBin == self.UDPBin:
-            if self.Pid < 1:
-                print(datetime.datetime.now(), ":", "Signal received to START", self.ApplicationID)
-                if self.isTaskRunning():
-                    print(datetime.datetime.now(), ":", self.ApplicationParameters , 'is already running')
-                    return False
-                else:
-                    fullPath = str(explorerPath + ' "' + self.ApplicationPath + "\\" + self.ApplicationParameters+ '"')
-                    print(fullPath)
-                    self.process = subprocess.Popen(fullPath, shell=True)
-                    self.process.communicate()
-                    print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Started with PID:', self.Pid)
-                    self.Pid = self.process.pid
-                    return True
-            else:
-                self.process.terminate()
-                print(datetime.datetime.now(), ":", "Signal received to STOP", self.ApplicationParameters, )
-                print(datetime.datetime.now(), ":", self.ApplicationParameters, 'with PID:', self.Pid, 'Stopped')
-                self.Pid = 0
+    def startStopApp(self):
+        if self.Pid < 1:
+            print(datetime.datetime.now(), ":", "Signal received to START", self.ApplicationID)
+            if self.isTaskRunning():
+                print(datetime.datetime.now(), ":", self.ApplicationParameters , 'is already running')
                 return False
+            else:
+                fullPath = str(explorerPath + ' "' + self.ApplicationPath + "\\" + self.ApplicationParameters+ '"')
+                print(fullPath)
+                self.process = subprocess.Popen(fullPath, shell=True)
+                self.process.communicate()
+                print(datetime.datetime.now(), ":", self.ApplicationParameters, 'Started with PID:', self.Pid)
+                self.Pid = self.process.pid
+                return True
+        else:
+            self.process.terminate()
+            print(datetime.datetime.now(), ":", "Signal received to STOP", self.ApplicationParameters, )
+            print(datetime.datetime.now(), ":", self.ApplicationParameters, 'with PID:', self.Pid, 'Stopped')
+            self.Pid = 0
+            return False
 
     def isTaskRunning(self):
         tasklist = os.popen('tasklist /v | findstr "' + self.ApplicationParameters + '"')
@@ -100,9 +99,8 @@ else:
     pickle.dump(Apps, open(configFileName, "wb"), pickle.HIGHEST_PROTOCOL)
 
 run = True
-
 while run:
     capturedStr = getCapturedString()
-    for i in range(0,8):
-        Apps[i].startStopApp(capturedStr)
-        
+    instanceNum = int(capturedStr)
+    Apps[instanceNum].startStopApp()
+
