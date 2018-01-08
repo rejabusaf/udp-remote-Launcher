@@ -50,22 +50,7 @@ class Launcher:
         if self.ApplicationParameters in tasklist:
             return True
         return False
-
-    @classmethod
-    def getinstances(cls):
-        dead = set()
-        for ref in cls._instances:
-            obj = ref()
-            if obj is not None:
-                yield obj
-            else:
-                dead.add(ref)
-        cls._instances -= dead
-
-    def __str__(self):
-        return "Button #{} - ApplicationPath: {} - ApplicationParameters: {} - UDPBin: {}".format(self.ApplicationID, self.ApplicationPath, self.ApplicationParameters, self.UDPBin)
-
-
+    
 def getCapturedString():
     wOLServer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     wOLServer.bind(("", inListenPort))
