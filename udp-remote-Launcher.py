@@ -64,6 +64,7 @@ configFileName = "config.raw"
 AppInstanceCounter = 1
 explorerPath = '"C:\Windows\explorer.exe"'
 Apps = []
+inListenPort = 170  # Print server
 
 if os.path.isfile('./'+configFileName):
     print(datetime.datetime.now(), ":", "Config File found: " + configFileName + ". Loading Buttons")
@@ -88,6 +89,6 @@ else:
 run = True
 while run:
     capturedStr = getCapturedString()
-    instanceNum = int(capturedStr)
+    instanceNum = (int(capturedStr)-1)
     Apps[instanceNum].startStopApp()
 
