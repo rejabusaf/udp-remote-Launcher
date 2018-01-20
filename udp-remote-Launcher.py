@@ -1,4 +1,3 @@
-
 import os
 import socket
 import subprocess
@@ -6,9 +5,8 @@ import datetime
 import weakref
 import pickle
 
-class Launcher:
 
-    _instances = set()
+class Launcher:
 
     def __init__(self, FPath):
         global AppInstanceCounter
@@ -91,4 +89,3 @@ while run:
     capturedStr = getCapturedString()
     instanceNum = (int(capturedStr)-1)
     Apps[instanceNum].startStopApp()
-
